@@ -1,1 +1,50 @@
-<!-- Final index.html content goes here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SECamb CFR Falls Assessment</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <img src="secamb_logo.png" alt="SECamb" class="logo"/>
+    <h1 class="app-title">Falls Assessment Tool</h1>
+    <img src="nhs_logo.png" alt="NHS" class="logo"/>
+  </header>
+
+  <main id="main-form">
+    <!-- Patient Identifiers -->
+    <section>
+      <label>CFR Call Sign <input type="text" id="cfr-id" placeholder="e.g. CR-0386"/></label>
+      <label>ESR Number <input type="text" id="esr-number"/></label>
+      <label>Date <input type="date" id="incident-date"/></label>
+      <label>Time <input type="time" id="incident-time"/></label>
+      <label>INC Number <input type="text" id="inc-number"/></label>
+      <label>Patient Sex 
+        <select id="patient-sex">
+          <option value="">Select</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+      <label>Patient Age <input type="number" id="patient-age" min="0"/></label>
+    </section>
+
+    <!-- OBS section, ISTUMBLE, FAST, FRAT and other sections are added dynamically by JS -->
+    <div id="dynamic-sections"></div>
+  </main>
+
+  <footer class="bottom-banner">
+    <button id="summaryBtn">📄 Summary</button>
+    <button id="medsBtn">💊 Medicines</button>
+    <button id="settingsBtn">☰ Settings</button>
+  </footer>
+
+  <!-- Modals and views go here -->
+  <div id="card-view" class="hidden"></div>
+</body>
+</html>
