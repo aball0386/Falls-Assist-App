@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Falls Assessment Tool</title>
-<link rel="stylesheet" href="style.css" />
-<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#00703c" />
-<script defer src="app.js"></script>
-
-<!-- Libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Falls Assessment Tool</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#00703c" />
+  <script defer src="app.js"></script>
 </head>
 <body>
   <header class="banner">
@@ -22,6 +17,37 @@
   </header>
 
   <main>
+    <!-- CFR and Patient Details -->
+    <section id="cfr-details">
+      <h2>Responder & Patient Details</h2>
+      <label for="callsign">CFR Call Sign</label>
+      <input type="text" id="callsign" placeholder="e.g. CFR001" />
+
+      <label for="esr">ESR Number</label>
+      <input type="text" id="esr" placeholder="e.g. 12345678" />
+
+      <label for="date">Date</label>
+      <input type="date" id="date" />
+
+      <label for="time">Time</label>
+      <input type="time" id="time" />
+
+      <label for="inc">Incident Number (INC#)</label>
+      <input type="text" id="inc" placeholder="e.g. INC123456" />
+
+      <label for="age">Patient Age</label>
+      <input type="number" id="age" min="0" max="120" placeholder="e.g. 79" />
+
+      <label for="sex">Patient Sex</label>
+      <select id="sex">
+        <option value="">Please Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Non-binary">Non-binary</option>
+        <option value="Prefer not to say">Prefer not to say</option>
+      </select>
+    </section>
+
     <!-- ISTUMBLE -->
     <section id="istumble">
       <h2>ISTUMBLE Assessment</h2>
@@ -36,39 +62,96 @@
       <div id="frat-content"></div>
       <button id="frat-calculate">Calculate FRAT</button>
       <div id="frat-result" class="risk-result"></div>
+      <button id="toggle-frat-part2">Show/Hide Risk Factor Checklist</button>
+      <div id="frat-part2" style="display:none;">
+        <h3>Part 2: Risk Factor Checklist</h3>
+        <div id="frat-checklist"></div>
+      </div>
     </section>
 
     <!-- OBS & NEWS2 -->
     <section id="obs-news2">
       <h2>Observations (OBS) & NEWS2</h2>
       <div id="obs-content"></div>
+      <label for="postlift-sbp">Post-Lift SBP (mmHg)</label>
+      <input type="number" id="postlift-sbp" placeholder="e.g. 120" />
+      <label for="postlift-time">Time Taken</label>
+      <input type="time" id="postlift-time" />
       <div id="news2-result" class="risk-result"></div>
     </section>
 
     <!-- Summary -->
     <section id="summary">
       <h2>Assessment Summary</h2>
-      <button id="generate-email">Generate Summary</button>
+      <button id="generate-summary">Generate PDF Summary</button>
     </section>
   </main>
 
   <!-- AMTS Modal -->
-  <div id="amts-modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
-    <div style="background:#fff; margin:10% auto; padding:20px; border-radius:10px; max-width:400px; position:relative;">
+  <div id="amts-modal" class="modal">
+    <div class="modal-content">
       <h3>AMTS - Abbreviated Mental Test Score</h3>
       <ol>
-        <li>Age: "What is your age?"</li>
-        <li>Time: "What is the time to the nearest hour?"</li>
-        <li>Address: Provide an address for the patient to repeat, ask the patient to recall it at the end of the test. For example, "42 West Street"</li>
-        <li>Year: "What is the Current year?"</li>
-        <li>Place: "What is the name of this place?" or "What is your house number?"</li>
-        <li>Person Recognition: "Can you recognize these two people?" (presenting pictures or pointing out individuals like a family member or carer)</li>
-        <li>Date of Birth: "What is your date of birth?" (day and month are sufficient)</li>
-        <li>World War I: "In what year did World War I begin?" ans: 1914</li>
-        <li>Monarch: "Who is the current monarch?"</li>
-        <li>Counting Backwards: "Please count backwards from 20 to 1."</li>
+        <li>What is your age?</li>
+        <li>What is the time to the nearest hour?</li>
+        <li>Repeat address for recall (e.g. "42 West Street")</li>
+        <li>What is the current year?</li>
+        <li>Where are we now (place name or house number)?</li>
+        <li>Recognise two people (e.g. family or carers)</li>
+        <li>What is your date of birth?</li>
+        <li>In what year did WWI begin? (1914)</li>
+        <li>Who is the current monarch?</li>
+        <li>Count backward from 20 to 1.</li>
       </ol>
-      <button id="close-amts" style="margin-top:15px; background:#00703c; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Close</button>
+      <button id="close-amts">Close</button>
+    </div>
+  </div>
+
+  <!-- Bottom Banner -->
+  <footer class="bottom-banner">
+    <button id="menu-toggle">☰</button>
+    <button id="meds-toggle">💊</button>
+  </footer>
+
+  <!-- Settings Panel -->
+  <div id="settingsPanel" style="display:none;">
+    <h3>App Settings</h3>
+    <label for="theme-toggle">Theme</label>
+    <select id="theme-toggle">
+      <option value="green">Ambulance Green</option>
+      <option value="red">Rescue Red</option>
+    </select>
+    <label for="dark-mode">Dark Mode</label>
+    <input type="checkbox" id="dark-mode" />
+    <label for="font-select">Font</label>
+    <select id="font-select">
+      <option value="default">Default</option>
+      <option value="opendyslexic">Open Dyslexic</option>
+      <option value="roboto">Roboto Slab</option>
+      <option value="bionic">Bionic Reading</option>
+    </select>
+    <button id="reset-app">Reset App</button>
+  </div>
+
+  <!-- Medicines Modal -->
+  <div id="meds-modal" class="modal">
+    <div class="modal-content">
+      <h3>UK Blood Thinners Reference</h3>
+      <ul>
+        <li>Warfarin (Marevan, Coumadin)</li>
+        <li>Rivaroxaban (Xarelto)</li>
+        <li>Apixaban (Eliquis)</li>
+        <li>Edoxaban (Lixiana)</li>
+        <li>Dabigatran (Pradaxa)</li>
+        <li>Heparin (Clexane, Fragmin, Innohep)</li>
+        <li>Aspirin (Disprin, Caprin, Nu-Seals)</li>
+        <li>Clopidogrel (Plavix, Grepid)</li>
+        <li>Ticagrelor (Brilique)</li>
+        <li>Prasugrel (Efient)</li>
+        <li>Dipyridamole (Persantin)</li>
+      </ul>
+      <p>Select if patient is taking any of these for automatic alerting.</p>
+      <button id="close-meds">Close</button>
     </div>
   </div>
 
@@ -78,3 +161,4 @@
   </footer>
 </body>
 </html>
+
