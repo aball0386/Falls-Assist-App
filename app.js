@@ -261,12 +261,3 @@ function buildFrat() {
     { value: "Low", text: "Low" },
     { value: "Medium", text: "Medium" },
     { value: "High", text: "High" }
-  ]);
-  fratContainer.appendChild(createLabelWithElement("Risk Status", riskStatus1));
-
-  const revisedCarePlan1 = createSelect("revisedCarePlan1", [
-    { value: "", text: "Please Select" },
-    { value: "Y", text: "Yes" },
-    { value: "N", text: "No" }
-  ]);
-  fratContainer.appendChild(createLabelWith
