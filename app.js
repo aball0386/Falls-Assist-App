@@ -263,4 +263,41 @@ function calculateFratScore() {
   if (!isNaN(psychVal)) score += psychVal;
 
   const cogVal = Number(document.getElementById("cog").value);
-  if (!isNaN(cogVal
+  if (!isNaN(cogVal)) score += cogVal;
+
+  if (document.getElementById("autoHighRisk1").checked) score += 4;
+  if (document.getElementById("autoHighRisk2").checked) score += 4;
+
+  let riskLevel = "Minimal Risk";
+  if (score >= 16) riskLevel = "High Risk";
+  else if (score >= 12) riskLevel = "Medium Risk";
+  else if (score >= 5) riskLevel = "Low Risk";
+
+  const scoreDisplay = document.getElementById("frat-score-display");
+  scoreDisplay.textContent = `FRAT Score: ${score} — ${riskLevel}`;
+  scoreDisplay.style.color = (riskLevel === "High Risk") ? "red" : (riskLevel === "Medium Risk") ? "orange" : "green";
+}
+
+// Add OBS & NEWS2 and summary generation as needed here...
+
+document.addEventListener("DOMContentLoaded", () => {
+  buildIstumble();
+  buildFrat();
+
+  document.getElementById("istumble-evaluate").addEventListener("click", evaluateIstumble);
+  document.getElementById("frat-calculate").addEventListener("click", calculateFratScore);
+
+  document.getElementById("close-amts").addEventListener("click", () => {
+    document.getElementById("amts-modal").style.display = "none";
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').then(registration => {
+        console.log('Service Worker registered:', registration.scope);
+      }).catch(err => {
+        console.error('Service Worker registration failed:', err);
+      });
+    });
+  }
+});
