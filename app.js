@@ -112,7 +112,7 @@ function evaluateIstumble() {
   }
 }
 
-// FRAT Build (without Part 3)
+// FRAT Build (with Yes/No dropdown checklist and AMTS ref button)
 function buildFrat() {
   const fratContainer = document.getElementById("frat-content");
   fratContainer.innerHTML = "";
@@ -141,14 +141,48 @@ function buildFrat() {
   ], "Select psychological status");
   fratContainer.appendChild(createLabelWithElement("Psychological Status", psych));
 
+  // Cognitive status + AMTS reference button container
   const cog = createSelect("cog", [
     { value: "1", text: "AMTS 9 or 10 (Intact)" },
     { value: "2", text: "AMTS 7-8 (Mildly Impaired)" },
     { value: "3", text: "AMTS 5-6 (Moderately Impaired)" },
     { value: "4", text: "AMTS 4 or less (Severely Impaired)" }
   ], "Select cognitive status");
-  fratContainer.appendChild(createLabelWithElement("Cognitive Status (AMTS)", cog));
 
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.alignItems = "center";
+  container.style.gap = "10px";
+
+  const labelText = document.createElement("label");
+  labelText.htmlFor = "cog";
+  labelText.style.fontWeight = "600";
+  labelText.textContent = "Cognitive Status (AMTS)";
+
+  const refButton = document.createElement("button");
+  refButton.type = "button";
+  refButton.textContent = "AMTS Questions";
+  refButton.style.padding = "4px 8px";
+  refButton.style.fontSize = "0.85rem";
+  refButton.style.cursor = "pointer";
+  refButton.style.backgroundColor = "#00703c";
+  refButton.style.color = "white";
+  refButton.style.border = "none";
+  refButton.style.borderRadius = "4px";
+
+  refButton.addEventListener("click", () => {
+    document.getElementById("amts-modal").style.display = "block";
+  });
+
+  container.appendChild(labelText);
+  container.appendChild(refButton);
+
+  const labelWithSelect = createLabelWithElement("", cog);
+  labelWithSelect.insertBefore(container, labelWithSelect.firstChild);
+
+  fratContainer.appendChild(labelWithSelect);
+
+  // High Risk Checkboxes
   const highRisk1 = createInput("autoHighRisk1", "checkbox");
   const highRisk1Label = document.createElement("label");
   highRisk1Label.htmlFor = "autoHighRisk1";
@@ -187,14 +221,12 @@ function buildFrat() {
   ];
 
   checklistItems.forEach((item, i) => {
-    const checkbox = createInput(`checklist${i}`, "checkbox");
-    const label = document.createElement("label");
-    label.htmlFor = `checklist${i}`;
-    label.textContent = item;
-    label.style.display = "block";
-    label.style.marginTop = "8px";
-    fratContainer.appendChild(checkbox);
-    fratContainer.appendChild(label);
+    const select = createSelect(`checklist${i}`, [
+      { value: "", text: "Please Select" },
+      { value: "Yes", text: "Yes" },
+      { value: "No", text: "No" }
+    ]);
+    fratContainer.appendChild(createLabelWithElement(item, select));
   });
 
   const historyTitle = document.createElement("h3");
@@ -278,26 +310,67 @@ function calculateFratScore() {
   scoreDisplay.style.color = (riskLevel === "High Risk") ? "red" : (riskLevel === "Medium Risk") ? "orange" : "green";
 }
 
-// Add OBS & NEWS2 and summary generation as needed here...
+// OBS & NEWS2 fields configuration
+const obsFields = [
+  { id: "rr", label: "Respiratory Rate", min: 8, max: 25 },
+  { id: "spo2", label: "Oxygen Saturation (%)", min: 85, max: 100 },
+  { id: "o2supp", label: "Oxygen Supplement", options: ["None", "Low flow", "High flow"] },
+  { id: "temp", label: "Temperature (°C)", min: 34, max: 42 },
+  { id: "sbp", label: "Systolic Blood Pressure (mmHg)", min: 50, max: 250 },
+  { id: "hr", label: "Heart Rate", min: 30, max: 200 },
+  { id: "avpu", label: "AVPU Score", options: ["Alert", "Voice", "Pain", "Unresponsive"] }
+];
 
-document.addEventListener("DOMContentLoaded", () => {
-  buildIstumble();
-  buildFrat();
+function buildObs() {
+  const obsContainer = document.getElementById("obs-content");
+  obsContainer.innerHTML = "";
 
-  document.getElementById("istumble-evaluate").addEventListener("click", evaluateIstumble);
-  document.getElementById("frat-calculate").addEventListener("click", calculateFratScore);
-
-  document.getElementById("close-amts").addEventListener("click", () => {
-    document.getElementById("amts-modal").style.display = "none";
+  obsFields.forEach(field => {
+    let element;
+    if (field.options) {
+      element = createSelect(field.id, field.options.map(opt => ({ value: opt, text: opt })), "Please Select");
+    } else {
+      element = createInput(field.id, "number");
+      if (field.min !== undefined) element.min = field.min;
+      if (field.max !== undefined) element.max = field.max;
+    }
+    obsContainer.appendChild(createLabelWithElement(field.label, element));
   });
+}
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').then(registration => {
-        console.log('Service Worker registered:', registration.scope);
-      }).catch(err => {
-        console.error('Service Worker registration failed:', err);
-      });
-    });
-  }
-});
+function calculateNews2() {
+  let score = 0;
+
+  const rr = parseInt(document.getElementById("rr").value) || 0;
+  if (rr <= 8) score += 3;
+  else if (rr >= 9 && rr <= 11) score += 1;
+  else if (rr >= 12 && rr <= 20) score += 0;
+  else if (rr >= 21 && rr <= 24) score += 2;
+  else if (rr >= 25) score += 3;
+
+  const spo2 = parseInt(document.getElementById("spo2").value) || 0;
+  if (spo2 <= 91) score += 3;
+  else if (spo2 >= 92 && spo2 <= 93) score += 2;
+  else if (spo2 >= 94 && spo2 <= 95) score += 1;
+
+  const temp = parseFloat(document.getElementById("temp").value) || 0;
+  if (temp <= 35) score += 3;
+  else if (temp >= 35.1 && temp <= 36) score += 1;
+  else if (temp >= 38.1 && temp <= 39) score += 1;
+  else if (temp > 39) score += 2;
+
+  const sbp = parseInt(document.getElementById("sbp").value) || 0;
+  if (sbp <= 90) score += 3;
+  else if (sbp >= 91 && sbp <= 100) score += 2;
+  else if (sbp >= 101 && sbp <= 110) score += 1;
+
+  const hr = parseInt(document.getElementById("hr").value) || 0;
+  if (hr <= 40) score += 3;
+  else if (hr >= 41 && hr <= 50) score += 1;
+  else if (hr >= 51 && hr <= 90) score += 0;
+  else if (hr >= 91 && hr <= 110) score += 1;
+  else if (hr >= 111 && hr <= 130) score += 2;
+  else if (hr > 130) score += 3;
+
+  const avpu = document.getElementById("avpu").value;
+  if (avpu === "Voice" || avpu === "Pain" || avpu === "Unresponsive") score +=
