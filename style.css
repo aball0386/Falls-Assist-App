@@ -6,28 +6,8 @@ body {
   color: #003b2b;
 }
 
-.banner {
-  background-color: #00703c;
-  color: white;
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo-left,
-.logo-right {
-  height: 50px;
-  background-color: white;
-  border-radius: 5px;
-  padding: 4px;
-}
-
-h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  flex-grow: 1;
-  text-align: center;
+h1, h2, h3 {
+  margin: 0 0 10px;
 }
 
 main {
@@ -50,7 +30,9 @@ label {
 
 select,
 input[type="number"],
-input[type="text"] {
+input[type="text"],
+input[type="time"],
+input[type="date"] {
   width: 100%;
   padding: 7px;
   margin-top: 5px;
@@ -83,13 +65,141 @@ button:hover {
 }
 
 .high-risk {
-  color: red;
+  color: red !important;
+  border: 2px solid red;
 }
 
 .medium-risk {
-  color: orange;
+  color: orange !important;
+  border: 2px solid orange;
 }
 
 .low-risk {
-  color: green;
+  color: green !important;
+  border: 2px solid green;
 }
+
+footer {
+  text-align: center;
+  padding: 15px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.banner {
+  background-color: #00703c;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-left,
+.logo-right {
+  height: 50px;
+  border-radius: 5px;
+  padding: 4px;
+}
+
+/* Bottom bar */
+.bottom-banner {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #00703c;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+}
+
+.bottom-banner button {
+  background: none;
+  color: white;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+/* Settings panel */
+#settingsPanel {
+  position: fixed;
+  bottom: 60px;
+  left: 10px;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 15px;
+  z-index: 999;
+  border-radius: 10px;
+  max-width: 280px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+#settingsPanel label {
+  margin-top: 10px;
+}
+
+/* Modals */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+}
+
+/* Theme overrides */
+body.theme-red .banner,
+body.theme-red .bottom-banner {
+  background-color: #c72c2c;
+}
+
+body.dark-mode {
+  background-color: #222;
+  color: #eee;
+}
+
+body.dark-mode section {
+  background-color: #333;
+  color: #eee;
+}
+
+body.dark-mode input,
+body.dark-mode select {
+  background-color: #444;
+  color: #fff;
+  border-color: #666;
+}
+
+/* Font variations */
+body[data-font="opendyslexic"] {
+  font-family: 'OpenDyslexic', Arial, sans-serif;
+}
+
+body[data-font="roboto"] {
+  font-family: 'Roboto Slab', serif;
+}
+
+body[data-font="bionic"] * {
+  font-family: Arial, sans-serif;
+}
+
+body[data-font="bionic"] label, 
+body[data-font="bionic"] option, 
+body[data-font="bionic"] p {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
