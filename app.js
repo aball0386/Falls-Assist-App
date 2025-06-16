@@ -1,4 +1,4 @@
-// === Helper Functions ===
+// === Utility Functions ===
 function createOption(value, text, selected = false) {
   const option = document.createElement("option");
   option.value = value;
@@ -15,7 +15,7 @@ function createSelect(id, options, defaultText = "Please Select") {
   return select;
 }
 
-function createLabel(text, element, description) {
+function createLabel(text, element, description = "") {
   const label = document.createElement("label");
   label.textContent = text;
   label.appendChild(document.createElement("br"));
@@ -28,6 +28,48 @@ function createLabel(text, element, description) {
   }
   return label;
 }
+
+function toggleSection(id) {
+  document.querySelectorAll("section").forEach(s => {
+    if (s.id === id) s.classList.toggle("hidden");
+    else s.classList.add("hidden");
+  });
+}
+
+function resetForm() {
+  document.querySelectorAll("input, select").forEach(el => {
+    if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+    else el.value = "";
+  });
+  document.getElementById("summary-content").innerHTML = "";
+}
+
+// === Theme & Settings ===
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("theme-selector").addEventListener("change", e => {
+    document.body.className = e.target.value;
+  });
+
+  document.getElementById("font-selector").addEventListener("change", e => {
+    document.body.style.fontFamily = {
+      standard: "Arial, sans-serif",
+      bionic: "'Atkinson Hyperlegible', Arial",
+      sans: "Helvetica, sans-serif",
+      mono: "Courier New, monospace"
+    }[e.target.value];
+  });
+
+  document.getElementById("dark-mode-toggle").addEventListener("change", e => {
+    document.body.classList.toggle("dark", e.target.checked);
+  });
+
+  document.getElementById("reset-permissions").addEventListener("click", () => {
+    resetForm();
+    alert("All data and permissions cleared.");
+  });
+
+  buildAllSections(); // main init
+});
 
 // === ISTUMBLE Setup ===
 const istumbleQuestions = [
@@ -44,12 +86,23 @@ const istumbleQuestions = [
 function buildIstumble() {
   const container = document.getElementById("istumble-content");
   istumbleQuestions.forEach(q => {
+    const wrapper = document.createElement("div");
     const select = createSelect(q.id, [
       { value: "Yes", text: "Yes" },
       { value: "No", text: "No" },
       { value: "Unknown", text: "Unknown" }
     ]);
-    container.appendChild(createLabel(q.text, select, q.desc));
+    const comment = document.createElement("input");
+    comment.type = "text";
+    comment.placeholder = `Details for ${q.text}`;
+    comment.id = `${q.id}-comment`;
+    comment.classList.add("hidden");
+    select.addEventListener("change", () => {
+      comment.classList.toggle("hidden", select.value === "No" || select.value === "");
+    });
+    wrapper.appendChild(createLabel(q.text, select, q.desc));
+    wrapper.appendChild(comment);
+    container.appendChild(wrapper);
   });
 }
 
@@ -59,264 +112,184 @@ function evaluateIstumble() {
     const val = document.getElementById(q.id).value;
     if (val === "Yes") redFlag = true;
   });
-  const resultDiv = document.getElementById("istumble-result");
-  if (redFlag) {
-    resultDiv.textContent = "⚠️ Lift Not Authorised-Red Flag Detected: Escalate via Response Desk";
-    resultDiv.className = "risk-result high-risk";
+  const result = document.getElementById("istumble-result");
+  result.textContent = redFlag
+    ? "⚠️ Lift Not Authorised – Red Flag Detected: Escalate via Response Desk"
+    : "✅ Lift Authorised – No Red Flags";
+  result.className = redFlag ? "risk-result high-risk" : "risk-result low-risk";
+}
+
+// === FAST Test ===
+function buildFAST() {
+  ["fast-face", "fast-arm", "fast-speech"].forEach(id => {
+    document.getElementById(id).addEventListener("change", evaluateFAST);
+  });
+}
+
+function evaluateFAST() {
+  const face = document.getElementById("fast-face").value;
+  const arm = document.getElementById("fast-arm").value;
+  const speech = document.getElementById("fast-speech").value;
+  const alertBox = document.getElementById("fast-alert");
+
+  if (face === "Yes" || arm === "Yes" || speech === "Yes") {
+    alertBox.textContent = "⚠️ Suspected Stroke. Initiate Stroke Pathway and Update on NMA Message";
+    alertBox.className = "risk-result high-risk";
   } else {
-    resultDiv.textContent = "✅ Lift Authorised-No Red Flags Detected";
-    resultDiv.className = "risk-result low-risk";
+    alertBox.textContent = "";
+    alertBox.className = "";
   }
 }
 
-// === FRAT Setup ===
+// === OBS / NEWS2 (placeholder function - full scoring logic to be inserted)
+function buildOBS() {
+  const obsFields = [
+    { id: "resp", label: "Respiratory Rate" },
+    { id: "spo2", label: "Oxygen Saturation" },
+    { id: "temp", label: "Temperature" },
+    { id: "bp", label: "Blood Pressure" },
+    { id: "hr", label: "Heart Rate" },
+    { id: "bm", label: "BM (Blood Glucose)" },
+    { id: "conscious", label: "Consciousness (AVPU)" }
+  ];
+  const container = document.getElementById("obs-inputs");
+  obsFields.forEach(f => {
+    const input = document.createElement("input");
+    input.id = f.id;
+    input.placeholder = f.label;
+    input.addEventListener("change", () => colourCodeInput(input));
+    container.appendChild(createLabel(f.label, input));
+  });
+}
+
+function colourCodeInput(input) {
+  const val = parseFloat(input.value);
+  if (isNaN(val)) return input.style.backgroundColor = "";
+
+  // Dummy ranges
+  if (val < 3 || val > 15) input.style.backgroundColor = "#ffcccc";
+  else if (val >= 11) input.style.backgroundColor = "#ffeeba";
+  else input.style.backgroundColor = "#d4edda";
+}
+
 const fratQuestions = [
-  { id: "falls", text: "Previous falls in last 12 months?", desc: "e.g. confirmed by patient or carer", options: [
-    {value: "0", text: "None"},
-    {value: "2", text: "One"},
-    {value: "4", text: "Two or more"}
-  ]},
-  { id: "meds", text: "Medications (number of daily meds)?", desc: "e.g. 0-3, 4-6, 7+", options: [
-    {value: "0", text: "0-3"},
-    {value: "1", text: "4-6"},
-    {value: "2", text: "7+"}
-  ]},
-  { id: "psych", text: "Psychological status (mood)?", desc: "e.g. Normal, Mild, Severe", options: [
-    {value: "0", text: "Normal"},
-    {value: "1", text: "Mild"},
-    {value: "2", text: "Severe"}
-  ]},
-  { id: "cog", text: "Cognitive function (AMTS)?", desc: "e.g. 10 (normal), 7-9, <7", options: [
-    {value: "0", text: "10"},
-    {value: "2", text: "7-9"},
-    {value: "4", text: "<7"}
-  ]},
-  { id: "func", text: "Functional status change?", desc: "Recent change in function or mobility", options: [
-    {value: "0", text: "No"},
-    {value: "1", text: "Yes"}
-  ]},
-  { id: "postural", text: "Postural hypotension?", desc: "Symptoms or documented drop in BP", options: [
-    {value: "0", text: "No"},
-    {value: "1", text: "Yes"}
-  ]}
+  { id: "recent-fall", text: "Previous falls in last 12 months", values: ["None", "1 fall", "2 or more"], scores: [0, 5, 10] },
+  { id: "function-change", text: "Change in functioning in last 3 months?", values: ["No", "Yes", "Unknown"], scores: [0, 5, 5], comment: true },
+  { id: "meds", text: "Takes 4 or more meds?", values: ["Yes", "No"], scores: [5, 0] },
+  { id: "cognitive", text: "Cognitive impairment?", values: ["Yes", "No", "Unknown"], scores: [5, 0, 5] }
 ];
 
-function buildFrat() {
+function buildFRAT() {
   const container = document.getElementById("frat-content");
   fratQuestions.forEach(q => {
-    if (q.id === "cog") {
-      const infoBtn = document.createElement("button");
-      infoBtn.type = "button";
-      infoBtn.textContent = "ℹ️ AMTS Questions";
-      infoBtn.style.marginLeft = "10px";
-      infoBtn.style.fontSize = "0.9rem";
+    const select = createSelect(q.id, q.values.map((v, i) => ({ value: v, text: v })));
+    const label = createLabel(q.text, select);
+    container.appendChild(label);
 
-      infoBtn.addEventListener("click", () => {
-        document.getElementById("amts-modal").style.display = "block";
+    if (q.comment) {
+      const commentBox = document.createElement("input");
+      commentBox.type = "text";
+      commentBox.placeholder = `Comment for ${q.text}`;
+      commentBox.id = `${q.id}-comment`;
+      commentBox.classList.add("hidden");
+      container.appendChild(commentBox);
+      select.addEventListener("change", () => {
+        const show = select.value === "Yes" || select.value === "Unknown";
+        commentBox.classList.toggle("hidden", !show);
       });
-
-      const select = createSelect(q.id, q.options);
-      const label = createLabel(q.text, select, q.desc);
-      label.appendChild(infoBtn);
-      container.appendChild(label);
-    } else {
-      const select = createSelect(q.id, q.options);
-      container.appendChild(createLabel(q.text, select, q.desc));
     }
+
+    if (q.id === "recent-fall") {
+      const dateInput = document.createElement("input");
+      dateInput.type = "date";
+      dateInput.id = `${q.id}-date`;
+      container.appendChild(dateInput);
+    }
+
+    select.addEventListener("change", calculateFRAT);
   });
 }
 
-function calculateFrat() {
+function calculateFRAT() {
   let score = 0;
-  let risk = "";
-  let advisories = [];
-
   fratQuestions.forEach(q => {
     const val = document.getElementById(q.id).value;
-    if (val === "") return;
-    score += parseInt(val, 10);
+    const index = q.values.indexOf(val);
+    if (index >= 0) score += q.scores[index];
   });
 
-  if (score >= 16) {
-    risk = "High Risk";
-  } else if (score >= 12) {
-    risk = "Medium Risk";
-  } else if (score >= 5) {
-    risk = "Low Risk";
-  } else {
-    risk = "Minimal Risk";
-  }
+  const result = document.getElementById("frat-result");
+  let level = "Low";
+  let cls = "low-risk";
+  if (score >= 16) [level, cls] = ["High", "high-risk"];
+  else if (score >= 12) [level, cls] = ["Medium", "medium-risk"];
 
-  if (score >= 16) advisories.push("Urgent referral to falls prevention team.");
-  if (score >= 12 && score < 16) advisories.push("Consider referral and close monitoring.");
-
-  const resultDiv = document.getElementById("frat-result");
-  resultDiv.innerHTML = `<strong>FRAT Score: ${score} / 20 (${risk})</strong>`;
-  if (advisories.length) {
-    resultDiv.innerHTML += "<ul>" + advisories.map(a => `<li>${a}</li>`).join("") + "</ul>";
-  }
-  resultDiv.className = risk === "High Risk" ? "risk-result high-risk" : "risk-result low-risk";
+  result.textContent = `FRAT Score: ${score} – ${level} Risk`;
+  result.className = `risk-result ${cls}`;
 }
 
-// === OBS & NEWS2 Setup ===
-const obsFields = [
-  { id: "rr", text: "Respiratory Rate (breaths/min)", min: 8, max: 30 },
-  { id: "spo2", text: "Oxygen Saturation (%)", min: 75, max: 100 },
-  { id: "o2supp", text: "Oxygen Supplementation?", options: ["No", "Yes"] },
-  { id: "temp", text: "Temperature (°C)", min: 32.0, max: 42.0 },
-  { id: "sbp", text: "Systolic Blood Pressure (mmHg)", min: 65, max: 200 },
-  { id: "hr", text: "Heart Rate (bpm)", min: 40, max: 200 },
-  { id: "avpu", text: "Level of Consciousness (AVPU)", options: ["Alert", "Voice", "Pain", "Unresponsive"] }
+// === Summary / PDF Export ===
+document.getElementById("summaryBtn").addEventListener("click", () => {
+  const content = document.getElementById("summary-content");
+  content.innerHTML = `
+    <strong>Call Sign:</strong> ${document.getElementById("cfr-sign").value}<br/>
+    <strong>ESR:</strong> ${document.getElementById("esr-number").value}<br/>
+    <strong>INC:</strong> ${document.getElementById("incident-number").value}<br/>
+    <strong>Date:</strong> ${document.getElementById("assessment-date").value}<br/>
+    <strong>Time:</strong> ${document.getElementById("assessment-time").value}<br/>
+    <strong>Sex:</strong> ${document.getElementById("patient-sex").value}<br/>
+    <strong>Age:</strong> ${document.getElementById("patient-age").value}<br/>
+    <strong>NEWS2:</strong> ${document.getElementById("news2-score").textContent}<br/>
+    <strong>FRAT:</strong> ${document.getElementById("frat-result").textContent}<br/>
+    <strong>FAST:</strong> ${document.getElementById("fast-alert").textContent}<br/>
+  `;
+
+  const win = window.open('', '_blank');
+  win.document.write('<html><head><title>PDF Export</title></head><body>');
+  win.document.write(content.innerHTML);
+  win.document.write('</body></html>');
+  win.print();
+
+  const mailLink = `mailto:?subject=Falls Assessment Report&body=Attached is the patient's falls assessment summary.`;
+  window.location.href = mailLink;
+});
+
+// === Blood Thinners ===
+const bloodThinners = [
+  "Warfarin", "Apixaban (Eliquis)", "Rivaroxaban (Xarelto)", "Dabigatran (Pradaxa)", "Edoxaban (Lixiana)",
+  "Aspirin", "Clopidogrel (Plavix)", "Ticagrelor (Brilique)", "Prasugrel", "Dipyridamole", "Heparin", "LMWH"
 ];
 
-function buildObs() {
-  const container = document.getElementById("obs-content");
-  obsFields.forEach(f => {
-    let input;
-    if (f.options) {
-      input = createSelect(f.id, f.options.map(o => ({value: o, text: o})));
-    } else {
-      input = document.createElement("input");
-      input.type = "number";
-      input.id = f.id;
-      input.min = f.min;
-      input.max = f.max;
-      input.placeholder = f.text;
-    }
-    container.appendChild(createLabel(f.text, input));
+function buildMedList() {
+  const list = document.getElementById("blood-thinners-list");
+  bloodThinners.forEach(med => {
+    const li = document.createElement("li");
+    li.textContent = med;
+    list.appendChild(li);
   });
 }
 
-function calculateNews2() {
-  function scoreRR(rr) {
-    if (rr === "") return 0;
-    rr = Number(rr);
-    if (rr <= 8) return 3;
-    if (rr <= 11) return 1;
-    if (rr >= 25) return 3;
-    if (rr >= 21) return 2;
-    return 0;
-  }
-
-  function scoreSpo2(spo2, o2supp) {
-    spo2 = Number(spo2);
-    if (spo2 === "") return 0;
-    if (spo2 <= 91) return 3;
-    if (spo2 <= 93) return 2;
-    if (spo2 <= 95) return 1;
-    return 0;
-  }
-
-  function scoreTemp(temp) {
-    if (temp === "") return 0;
-    temp = Number(temp);
-    if (temp <= 35) return 3;
-    if (temp >= 39.1) return 2;
-    if (temp >= 38.1) return 1;
-    return 0;
-  }
-
-  function scoreSBP(sbp) {
-    if (sbp === "") return 0;
-    sbp = Number(sbp);
-    if (sbp <= 90) return 3;
-    if (sbp <= 100) return 2;
-    if (sbp <= 110) return 1;
-    return 0;
-  }
-
-  function scoreHR(hr) {
-    if (hr === "") return 0;
-    hr = Number(hr);
-    if (hr <= 40) return 3;
-    if (hr <= 50) return 1;
-    if (hr >= 131) return 3;
-    if (hr >= 111) return 2;
-    if (hr >= 91) return 1;
-    return 0;
-  }
-
-  function scoreAVPU(avpu) {
-    if (avpu === "") return 0;
-    if (avpu === "Alert") return 0;
-    return 3;
-  }
-
-  const rr = document.getElementById("rr").value;
-  const spo2 = document.getElementById("spo2").value;
-  const o2supp = document.getElementById("o2supp").value;
-  const temp = document.getElementById("temp").value;
-  const sbp = document.getElementById("sbp").value;
-  const hr = document.getElementById("hr").value;
-  const avpu = document.getElementById("avpu").value;
-
-  let total = 0;
-  total += scoreRR(rr);
-  total += scoreSpo2(spo2, o2supp);
-  total += scoreTemp(temp);
-  total += scoreSBP(sbp);
-  total += scoreHR(hr);
-  total += scoreAVPU(avpu);
-
-  let riskBand = "low-risk";
-  let riskText = "Low Risk";
-  if (total >= 7) {
-    riskBand = "high-risk";
-    riskText = "High Risk — Escalate Immediately";
-  } else if (total >= 5) {
-    riskBand = "medium-risk";
-    riskText = "Medium Risk — Close Monitoring";
-  }
-
-  const resultDiv = document.getElementById("news2-result");
-  resultDiv.textContent = `NEWS2 Score: ${total} (${riskText})`;
-  resultDiv.className = `risk-result ${riskBand}`;
+// === Help Tooltips ===
+function showHelp(section) {
+  const help = {
+    istumble: "Use ISTUMBLE to check for lift safety. Yes = red flag. Comment if Yes or Unknown.",
+    fast: "FAST helps detect stroke. Positive = immediate pathway initiation.",
+    obs: "Record vital signs for NEWS2 calculation. Colour coded by severity.",
+    frat: "FRAT = Falls Risk Assessment Tool. Higher scores mean higher fall risk."
+  };
+  document.getElementById("help-content").textContent = help[section];
+  document.getElementById("help-box").classList.remove("hidden");
+}
+function closeHelp() {
+  document.getElementById("help-box").classList.add("hidden");
 }
 
-// === Setup & event listeners ===
-document.addEventListener("DOMContentLoaded", () => {
+// === Full Init ===
+function buildAllSections() {
   buildIstumble();
-  buildFrat();
-  buildObs();
+  buildFAST();
+  buildOBS();
+  buildFRAT();
+  buildMedList();
+}
 
-  document.getElementById("istumble-evaluate").addEventListener("click", evaluateIstumble);
-  document.getElementById("frat-calculate").addEventListener("click", calculateFrat);
-
-  ["rr", "spo2", "o2supp", "temp", "sbp", "hr", "avpu"].forEach(id => {
-    document.getElementById(id).addEventListener("input", calculateNews2);
-    document.getElementById(id).addEventListener("change", calculateNews2);
-  });
-
-  document.getElementById("generate-email").addEventListener("click", () => {
-    const istumbleAnswers = istumbleQuestions.map(q => `${q.text}: ${document.getElementById(q.id).value || "Not answered"}`).join("\n");
-    const fratAnswers = fratQuestions.map(q => `${q.text}: ${document.getElementById(q.id).value || "Not answered"}`).join("\n");
-    const obsAnswers = obsFields.map(f => `${f.text}: ${document.getElementById(f.id).value || "Not answered"}`).join("\n");
-    const news2Score = document.getElementById("news2-result").textContent || "Not calculated";
-
-    const summary =
-      `Falls Assessment Summary:\n\n` +
-      `ISTUMBLE:\n${istumbleAnswers}\n\n` +
-      `FRAT:\n${fratAnswers}\n\n` +
-      `Observations:\n${obsAnswers}\n\n` +
-      `NEWS2 Score:\n${news2Score}`;
-
-    const subject = encodeURIComponent("Falls Assessment Summary");
-    const body = encodeURIComponent(summary);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-  });
-
-  document.getElementById("close-amts").addEventListener("click", () => {
-    document.getElementById("amts-modal").style.display = "none";
-  });
-
-  // PWA Service Worker registration
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').then(registration => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch(error => {
-        console.log('Service Worker registration failed:', error);
-      });
-    });
-  }
-});
