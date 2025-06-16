@@ -8,6 +8,11 @@
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#00703c" />
 <script defer src="app.js"></script>
+
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 </head>
 <body>
   <header class="banner">
@@ -17,6 +22,7 @@
   </header>
 
   <main>
+    <!-- ISTUMBLE -->
     <section id="istumble">
       <h2>ISTUMBLE Assessment</h2>
       <div id="istumble-content"></div>
@@ -24,19 +30,22 @@
       <div id="istumble-result" class="risk-result"></div>
     </section>
 
+    <!-- FRAT -->
     <section id="frat">
       <h2>FRAT Assessment</h2>
       <div id="frat-content"></div>
       <button id="frat-calculate">Calculate FRAT</button>
-      <div id="frat-score-display" class="risk-result"></div>
+      <div id="frat-result" class="risk-result"></div>
     </section>
 
+    <!-- OBS & NEWS2 -->
     <section id="obs-news2">
       <h2>Observations (OBS) & NEWS2</h2>
       <div id="obs-content"></div>
       <div id="news2-result" class="risk-result"></div>
     </section>
 
+    <!-- Summary -->
     <section id="summary">
       <h2>Assessment Summary</h2>
       <button id="generate-email">Generate Summary</button>
@@ -65,7 +74,6 @@
 
   <footer>
     <p>© 2025 Falls Assessment Tool</p>
-    <p>Created By Aaron Ball CFR</p>
   </footer>
 </body>
 </html>
