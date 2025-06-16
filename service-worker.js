@@ -4,15 +4,18 @@ const urlsToCache = [
   '/index.html',
   '/style.css',
   '/app.js',
+  '/manifest.json',
   '/nhs.png',
   '/secamb.png',
-  '/manifest.json',
-  // add other assets if any
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
@@ -23,3 +26,4 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
