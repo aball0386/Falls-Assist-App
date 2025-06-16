@@ -86,6 +86,7 @@ const istumbleQuestions = [
 
 function buildIstumble() {
   const container = document.getElementById("istumble-content");
+  container.innerHTML = "";
   istumbleQuestions.forEach(q => {
     const select = createSelect(q.id, [
       { value: "Yes", text: "Yes" },
@@ -261,3 +262,116 @@ function buildFrat() {
     { value: "Low", text: "Low" },
     { value: "Medium", text: "Medium" },
     { value: "High", text: "High" }
+  ]);
+  fratContainer.appendChild(createLabelWithElement("Risk Status", riskStatus1));
+
+  const revisedCarePlan1 = createSelect("revisedCarePlan1", [
+    { value: "", text: "Please Select" },
+    { value: "Y", text: "Yes" },
+    { value: "N", text: "No" }
+  ]);
+  fratContainer.appendChild(createLabelWithElement("Revised Care Plan (Y/N)", revisedCarePlan1));
+
+  const signedReview1 = createInput("signedReview1", "text", "Signature");
+  fratContainer.appendChild(createLabelWithElement("Signed", signedReview1));
+}
+
+function calculateFratScore() {
+  let score = 0;
+
+  const rfVal = Number(document.getElementById("recentFalls").value);
+  if (!isNaN(rfVal)) score += rfVal;
+
+  const medVal = Number(document.getElementById("meds").value);
+  if (!isNaN(medVal)) score += medVal;
+
+  const psychVal = Number(document.getElementById("psych").value);
+  if (!isNaN(psychVal)) score += psychVal;
+
+  const cogVal = Number(document.getElementById("cog").value);
+  if (!isNaN(cogVal)) score += cogVal;
+
+  if (document.getElementById("autoHighRisk1").checked) score += 4;
+  if (document.getElementById("autoHighRisk2").checked) score += 4;
+
+  let riskLevel = "Minimal Risk";
+  if (score >= 16) riskLevel = "High Risk";
+  else if (score >= 12) riskLevel = "Medium Risk";
+  else if (score >= 5) riskLevel = "Low Risk";
+
+  const scoreDisplay = document.getElementById("frat-score-display");
+  scoreDisplay.textContent = `FRAT Score: ${score} — ${riskLevel}`;
+  scoreDisplay.style.color = (riskLevel === "High Risk") ? "red" : (riskLevel === "Medium Risk") ? "orange" : "green";
+}
+
+// OBS & NEWS2 fields configuration
+const obsFields = [
+  { id: "rr", label: "Respiratory Rate", min: 8, max: 25 },
+  { id: "spo2", label: "Oxygen Saturation (%)", min: 85, max: 100 },
+  { id: "o2supp", label: "Oxygen Supplement", options: ["None", "Low flow", "High flow"] },
+  { id: "temp", label: "Temperature (°C)", min: 34, max: 42 },
+  { id: "sbp", label: "Systolic Blood Pressure (mmHg)", min: 50, max: 250 },
+  { id: "hr", label: "Heart Rate", min: 30, max: 200 },
+  { id: "avpu", label: "AVPU Score", options: ["Alert", "Voice", "Pain", "Unresponsive"] }
+];
+
+function buildObs() {
+  const obsContainer = document.getElementById("obs-content");
+  obsContainer.innerHTML = "";
+
+  obsFields.forEach(field => {
+    let element;
+    if (field.options) {
+      element = createSelect(field.id, field.options.map(opt => ({ value: opt, text: opt })), "Please Select");
+    } else {
+      element = createInput(field.id, "number");
+      if (field.min !== undefined) element.min = field.min;
+      if (field.max !== undefined) element.max = field.max;
+    }
+    obsContainer.appendChild(createLabelWithElement(field.label, element));
+  });
+}
+
+function calculateNews2() {
+  let score = 0;
+
+  const rr = parseInt(document.getElementById("rr").value) || 0;
+  if (rr <= 8) score += 3;
+  else if (rr >= 9 && rr <= 11) score += 1;
+  else if (rr >= 12 && rr <= 20) score += 0;
+  else if (rr >= 21 && rr <= 24) score += 2;
+  else if (rr >= 25) score += 3;
+
+  const spo2 = parseInt(document.getElementById("spo2").value) || 0;
+  if (spo2 <= 91) score += 3;
+  else if (spo2 >= 92 && spo2 <= 93) score += 2;
+  else if (spo2 >= 94 && spo2 <= 95) score += 1;
+
+  const temp = parseFloat(document.getElementById("temp").value) || 0;
+  if (temp <= 35) score += 3;
+  else if (temp >= 35.1 && temp <= 36) score += 1;
+  else if (temp >= 38.1 && temp <= 39) score += 1;
+  else if (temp > 39) score += 2;
+
+  const sbp = parseInt(document.getElementById("sbp").value) || 0;
+  if (sbp <= 90) score += 3;
+  else if (sbp >= 91 && sbp <= 100) score += 2;
+  else if (sbp >= 101 && sbp <= 110) score += 1;
+
+  const hr = parseInt(document.getElementById("hr").value) || 0;
+  if (hr <= 40) score += 3;
+  else if (hr >= 41 && hr <= 50) score += 1;
+  else if (hr >= 51 && hr <= 90) score += 0;
+  else if (hr >= 91 && hr <= 110) score += 1;
+  else if (hr >= 111 && hr <= 130) score += 2;
+  else if (hr > 130) score += 3;
+
+  const avpu = document.getElementById("avpu").value;
+  if (avpu === "Voice" || avpu === "Pain" || avpu === "Unresponsive") score += 3;
+
+  const news2Result = document.getElementById("news2-result");
+  news2Result.textContent = `NEWS2 Score: ${score}`;
+  news2Result.className = "risk-result";
+}
+
+document.addEventListener("DOMContentLoaded",
