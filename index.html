@@ -3,49 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Falls Assessment Tool</title>
-  <link rel="manifest" href="manifest.json" />
+  <title>Falls Assessment App</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css" />
-  <script defer src="app.js"></script>
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
 </head>
 <body>
   <header class="app-header">
-    <img src="secamb_logo.png" alt="SECamb" class="logo"/>
+    <img src="secamb_logo.png" class="logo" alt="SECamb Logo">
     <h1 class="app-title">Falls Assessment Tool</h1>
-    <img src="nhs_logo.png" alt="NHS" class="logo"/>
+    <img src="nhs_logo.png" class="logo" alt="NHS Logo">
   </header>
 
-  <main id="main-form">
-    <!-- Patient Identifiers -->
-    <section>
-      <label>CFR Call Sign <input type="text" id="cfr-id" placeholder="e.g. CR-0386"/></label>
-      <label>ESR Number <input type="text" id="esr-number"/></label>
-      <label>Date <input type="date" id="incident-date"/></label>
-      <label>Time <input type="time" id="incident-time"/></label>
-      <label>INC Number <input type="text" id="inc-number"/></label>
-      <label>Patient Sex 
-        <select id="patient-sex">
-          <option value="">Select</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-      </label>
-      <label>Patient Age <input type="number" id="patient-age" min="0"/></label>
+  <main>
+    <section id="main-form" class="form-section hidden">
+      <h2>Patient & Incident Details</h2>
+      <label>CFR Call Sign <input type="text" id="cfr-id" placeholder="e.g. CR-0386" /></label>
+      <label>ESR Number <input type="text" id="esr-number" /></label>
+      <label>Incident Date <input type="date" id="incident-date" /></label>
+      <label>Incident Time <input type="time" id="incident-time" /></label>
+      <label>INC Number <input type="text" id="inc-number" /></label>
+      <label>Patient Sex <select id="patient-sex">
+        <option value="">Select</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select></label>
+      <label>Patient Age <input type="number" id="patient-age" min="0" max="120" /></label>
+
+      <hr/>
+      <h2>FAST Test <span id="fast-help" class="help-icon">❓</span></h2>
+      <div id="fast-test"></div>
+      <div id="fast-result" class="risk-result"></div>
+
+      <hr/>
+      <h2>ISTUMBLE Assessment <span id="istumble-help" class="help-icon">❓</span></h2>
+      <div id="istumble-content"></div>
+      <div id="istumble-result" class="risk-result"></div>
+
+      <hr/>
+      <h2>Observations <span id="obs-help" class="help-icon">❓</span></h2>
+      <div id="obs-section"></div>
+      <label>SBP Post Lift Time <input type="time" id="sbp-time" /></label>
+
+      <hr/>
+      <h2>FRAT Assessment <span id="frat-help" class="help-icon">❓</span></h2>
+      <div id="frat-section">
+        <!-- Dynamic FRAT questions inserted here -->
+      </div>
+
+      <div id="frat-comments" class="conditional-comments"></div>
     </section>
 
-    <!-- Placeholder for dynamically generated sections like OBS, ISTUMBLE, FAST, FRAT -->
-    <div id="dynamic-sections"></div>
+    <section id="card-view" class="form-section hidden"></section>
   </main>
 
-  <footer class="bottom-banner">
-    <button id="summaryBtn">📄 Summary</button>
+  <footer class="app-footer">
+    <button id="summaryBtn">📋 Summary</button>
     <button id="medsBtn">💊 Medicines</button>
-    <button id="settingsBtn">☰ Settings</button>
+    <button id="settingsBtn">⚙️ Settings</button>
   </footer>
 
-  <!-- Dynamic View for Summary, Settings, Medicines -->
-  <div id="card-view" class="hidden"></div>
+  <script src="app.js"></script>
 </body>
 </html>
+
 
