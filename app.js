@@ -117,35 +117,35 @@ function buildFrat() {
   const fratContainer = document.getElementById("frat-content");
   fratContainer.innerHTML = "";
 
-  const recentFalls = createDropdown("recentFalls", [
-    {value: 2, text: "None in last 12 months"},
-    {value: 4, text: "One or more between 3 and 12 months ago"},
-    {value: 6, text: "One or more in last 3 months"},
-    {value: 8, text: "One or more in last 3 months whilst inpatient / resident"}
+  const recentFalls = createSelect("recentFalls", [
+    { value: "2", text: "None in last 12 months" },
+    { value: "4", text: "One or more between 3 and 12 months ago" },
+    { value: "6", text: "One or more in last 3 months" },
+    { value: "8", text: "One or more in last 3 months whilst inpatient / resident" }
   ], "Select recent falls");
   fratContainer.appendChild(createLabelWithElement("Recent Falls", recentFalls, "To score this, complete history of falls overleaf"));
 
-  const meds = createDropdown("meds", [
-    {value: 1, text: "Not taking any of these"},
-    {value: 2, text: "Taking one (Sedatives, Anti-Depressants)"},
-    {value: 3, text: "Taking two (Anti-Parkinson’s, Diuretics)"},
-    {value: 4, text: "Taking more than two (Anti-hypertensives, hypnotics)"}
+  const meds = createSelect("meds", [
+    { value: "1", text: "Not taking any of these" },
+    { value: "2", text: "Taking one (Sedatives, Anti-Depressants)" },
+    { value: "3", text: "Taking two (Anti-Parkinson’s, Diuretics)" },
+    { value: "4", text: "Taking more than two (Anti-hypertensives, hypnotics)" }
   ], "Select medication count");
   fratContainer.appendChild(createLabelWithElement("Medications", meds));
 
-  const psych = createDropdown("psych", [
-    {value: 1, text: "No apparent psychological issues"},
-    {value: 2, text: "Mild anxiety/depression or mildly affected"},
-    {value: 3, text: "Moderately affected (poor cooperation, insight)"},
-    {value: 4, text: "Severely affected (poor judgement esp. re mobility)"}
+  const psych = createSelect("psych", [
+    { value: "1", text: "No apparent psychological issues" },
+    { value: "2", text: "Mild anxiety/depression or mildly affected" },
+    { value: "3", text: "Moderately affected (poor cooperation, insight)" },
+    { value: "4", text: "Severely affected (poor judgement esp. re mobility)" }
   ], "Select psychological status");
   fratContainer.appendChild(createLabelWithElement("Psychological Status", psych));
 
-  const cog = createDropdown("cog", [
-    {value: 1, text: "AMTS 9 or 10 (Intact)"},
-    {value: 2, text: "AMTS 7-8 (Mildly Impaired)"},
-    {value: 3, text: "AMTS 5-6 (Moderately Impaired)"},
-    {value: 4, text: "AMTS 4 or less (Severely Impaired)"}
+  const cog = createSelect("cog", [
+    { value: "1", text: "AMTS 9 or 10 (Intact)" },
+    { value: "2", text: "AMTS 7-8 (Mildly Impaired)" },
+    { value: "3", text: "AMTS 5-6 (Moderately Impaired)" },
+    { value: "4", text: "AMTS 4 or less (Severely Impaired)" }
   ], "Select cognitive status");
   fratContainer.appendChild(createLabelWithElement("Cognitive Status (AMTS)", cog));
 
@@ -224,19 +224,19 @@ function buildFrat() {
   const reviewDate1 = createDateInput("reviewDate1");
   fratContainer.appendChild(createLabelWithElement("Review Date", reviewDate1));
 
-  const riskStatus1 = createDropdown("riskStatus1", [
-    {value: "", text: "Please Select"},
-    {value: "Low", text: "Low"},
-    {value: "Medium", text: "Medium"},
-    {value: "High", text: "High"}
-  ], "Select risk status");
+  const riskStatus1 = createSelect("riskStatus1", [
+    { value: "", text: "Please Select" },
+    { value: "Low", text: "Low" },
+    { value: "Medium", text: "Medium" },
+    { value: "High", text: "High" }
+  ]);
   fratContainer.appendChild(createLabelWithElement("Risk Status", riskStatus1));
 
-  const revisedCarePlan1 = createDropdown("revisedCarePlan1", [
-    {value: "", text: "Please Select"},
-    {value: "Y", text: "Yes"},
-    {value: "N", text: "No"}
-  ], "Select if care plan revised");
+  const revisedCarePlan1 = createSelect("revisedCarePlan1", [
+    { value: "", text: "Please Select" },
+    { value: "Y", text: "Yes" },
+    { value: "N", text: "No" }
+  ]);
   fratContainer.appendChild(createLabelWithElement("Revised Care Plan (Y/N)", revisedCarePlan1));
 
   const signedReview1 = createInput("signedReview1", "text", "Signature");
@@ -263,105 +263,4 @@ function calculateFratScore() {
   if (!isNaN(psychVal)) score += psychVal;
 
   const cogVal = Number(document.getElementById("cog").value);
-  if (!isNaN(cogVal)) score += cogVal;
-
-  if (document.getElementById("autoHighRisk1").checked) score += 4;
-  if (document.getElementById("autoHighRisk2").checked) score += 4;
-
-  let riskLevel = "Low Risk";
-  if (score >= 16) riskLevel = "High Risk";
-  else if (score >= 12) riskLevel = "Medium Risk";
-  else if (score >= 5) riskLevel = "Low Risk";
-  else riskLevel = "Minimal Risk";
-
-  const scoreDisplay = document.getElementById("frat-score-display");
-  scoreDisplay.textContent = `FRAT Score: ${score} — ${riskLevel}`;
-  scoreDisplay.style.color = (riskLevel === "High Risk") ? "red" : (riskLevel === "Medium Risk") ? "orange" : "green";
-}
-
-// OBS & NEWS2
-
-const obsFields = [
-  { id: "rr", text: "Respiratory Rate", min: 8, max: 25 },
-  { id: "spo2", text: "Oxygen Saturation (%)", min: 95, max: 100 },
-  { id: "o2supp", text: "Oxygen Supplement", options: ["None", "Low flow", "High flow"] },
-  { id: "temp", text: "Temperature (°C)", min: 36, max: 38 },
-  { id: "sbp", text: "Systolic BP (mmHg)", min: 90, max: 220 },
-  { id: "hr", text: "Heart Rate", min: 40, max: 130 },
-  { id: "avpu", text: "AVPU Score", options: ["Alert", "Voice", "Pain", "Unresponsive"] }
-];
-
-function buildObs() {
-  const obsContainer = document.getElementById("obs-content");
-  obsContainer.innerHTML = "";
-
-  obsFields.forEach(f => {
-    if (f.options) {
-      const select = createSelect(f.id, f.options.map(o => ({ value: o, text: o })), "Please Select");
-      obsContainer.appendChild(createLabelWithElement(f.text, select));
-    } else {
-      const input = createInput(f.id, "number");
-      if (f.min !== undefined) input.min = f.min;
-      if (f.max !== undefined) input.max = f.max;
-      obsContainer.appendChild(createLabelWithElement(f.text, input));
-    }
-  });
-}
-
-function calculateNews2() {
-  let score = 0;
-
-  // Simple NEWS2 scoring (example, can be expanded)
-  const rr = parseInt(document.getElementById("rr").value) || 0;
-  if (rr <= 8) score += 3;
-  else if (rr >= 9 && rr <= 11) score += 1;
-  else if (rr >= 12 && rr <= 20) score += 0;
-  else if (rr >= 21 && rr <= 24) score += 2;
-  else if (rr >= 25) score += 3;
-
-  const spo2 = parseInt(document.getElementById("spo2").value) || 0;
-  if (spo2 <= 91) score += 3;
-  else if (spo2 >= 92 && spo2 <= 93) score += 2;
-  else if (spo2 >= 94 && spo2 <= 95) score += 1;
-
-  const temp = parseFloat(document.getElementById("temp").value) || 0;
-  if (temp <= 35) score += 3;
-  else if (temp >= 35.1 && temp <= 36) score += 1;
-  else if (temp >= 38.1 && temp <= 39) score += 1;
-  else if (temp > 39) score += 2;
-
-  const sbp = parseInt(document.getElementById("sbp").value) || 0;
-  if (sbp <= 90) score += 3;
-  else if (sbp >= 91 && sbp <= 100) score += 2;
-  else if (sbp >= 101 && sbp <= 110) score += 1;
-
-  const hr = parseInt(document.getElementById("hr").value) || 0;
-  if (hr <= 40) score += 3;
-  else if (hr >= 41 && hr <= 50) score += 1;
-  else if (hr >= 51 && hr <= 90) score += 0;
-  else if (hr >= 91 && hr <= 110) score += 1;
-  else if (hr >= 111 && hr <= 130) score += 2;
-  else if (hr > 130) score += 3;
-
-  const avpu = document.getElementById("avpu").value;
-  if (avpu === "Voice") score += 3;
-  else if (avpu === "Pain") score += 3;
-  else if (avpu === "Unresponsive") score += 3;
-
-  const news2Result = document.getElementById("news2-result");
-  news2Result.textContent = `NEWS2 Score: ${score}`;
-
-  if (score >= 7) news2Result.className = "risk-result high-risk";
-  else if (score >= 5) news2Result.className = "risk-result medium-risk";
-  else news2Result.className = "risk-result low-risk";
-}
-
-// Summary email generation
-function generateSummary() {
-  const istumbleAnswers = istumbleQuestions.map(q => `${q.text}: ${document.getElementById(q.id).value || "Not answered"}`).join("\n");
-
-  const fratElements = document.querySelectorAll("#frat-content select, #frat-content input[type=checkbox], #frat-content textarea, #frat-content input[type=text], #frat-content input[type=date]");
-  let fratAnswers = "";
-  fratElements.forEach(el => {
-    let val = "";
-    if (el.type === "checkbox") val = el.checked ? "Yes" :
+  if (!isNaN(cogVal
