@@ -3,8 +3,9 @@
   "short_name": "FallsAssess",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#00703c",
+  "background_color": "#e8fef1",
   "theme_color": "#00703c",
+  "description": "A falls assessment tool for clinicians.",
   "icons": [
     {
       "src": "icon-192.png",
