@@ -1,14 +1,71 @@
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Falls Assessment Tool</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Falls Assessment Tool</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#00703c" />
+<script defer src="app.js"></script>
+</head>
+<body>
+  <header class="banner">
+    <img src="nhs.png" alt="NHS Logo" class="logo-left" />
+    <h1>Falls Assessment Tool</h1>
+    <img src="secamb.png" alt="SECamb Logo" class="logo-right" />
+  </header>
+
+  <main>
+    <section id="istumble">
+      <h2>ISTUMBLE Assessment</h2>
+      <div id="istumble-content"></div>
+      <button id="istumble-evaluate">Evaluate ISTUMBLE</button>
+      <div id="istumble-result" class="risk-result"></div>
+    </section>
+
+    <section id="frat">
+      <h2>FRAT Assessment</h2>
+      <div id="frat-content"></div>
+      <button id="frat-calculate">Calculate FRAT</button>
+      <div id="frat-score-display" class="risk-result"></div>
+    </section>
+
+    <section id="obs-news2">
+      <h2>Observations (OBS) & NEWS2</h2>
+      <div id="obs-content"></div>
+      <div id="news2-result" class="risk-result"></div>
+    </section>
+
+    <section id="summary">
+      <h2>Assessment Summary</h2>
+      <button id="generate-email">Generate Summary</button>
+    </section>
+  </main>
+
+  <!-- AMTS Modal -->
+  <div id="amts-modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.5);">
+    <div style="background:#fff; margin:10% auto; padding:20px; border-radius:10px; max-width:400px; position:relative;">
+      <h3>AMTS - Abbreviated Mental Test Score</h3>
+      <ol>
+        <li>Age of patient</li>
+        <li>Time (to nearest hour)</li>
+        <li>Address for recall at end of test</li>
+        <li>Current year</li>
+        <li>Current place</li>
+        <li>Recognition of two persons (doctor, nurse)</li>
+        <li>Date of birth</li>
+        <li>Year of first world war</li>
+        <li>Name of present monarch</li>
+        <li>Count backward from 20 to 1</li>
+      </ol>
+      <button id="close-amts" style="margin-top:15px; background:#00703c; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Close</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Falls Assessment Tool</p>
+    <p>Created By Aaron Ball CFR</p>
+  </footer>
+</body>
 </html>
