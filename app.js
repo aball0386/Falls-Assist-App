@@ -1,4 +1,4 @@
-// === Helper Functions ===
+// Helper functions
 function createOption(value, text, selected = false) {
   const option = document.createElement("option");
   option.value = value;
@@ -29,7 +29,50 @@ function createLabel(text, element, description) {
   return label;
 }
 
-// === ISTUMBLE Setup ===
+function createInput(id, type = "text", placeholder = "") {
+  const input = document.createElement("input");
+  input.type = type;
+  input.id = id;
+  if (placeholder) input.placeholder = placeholder;
+  return input;
+}
+
+function createTextarea(id, placeholder = "") {
+  const textarea = document.createElement("textarea");
+  textarea.id = id;
+  textarea.rows = 3;
+  textarea.placeholder = placeholder;
+  return textarea;
+}
+
+function createDateInput(id) {
+  const input = document.createElement("input");
+  input.type = "date";
+  input.id = id;
+  return input;
+}
+
+function createLabelWithElement(text, element, description = "") {
+  const label = document.createElement("label");
+  label.htmlFor = element.id;
+  label.style.display = "block";
+  label.style.marginTop = "12px";
+  label.style.fontWeight = "600";
+  label.textContent = text;
+  if (description) {
+    const desc = document.createElement("div");
+    desc.style.fontWeight = "400";
+    desc.style.fontSize = "0.85rem";
+    desc.style.marginTop = "3px";
+    desc.style.color = "#555";
+    desc.textContent = description;
+    label.appendChild(desc);
+  }
+  label.appendChild(element);
+  return label;
+}
+
+// ISTUMBLE Questions Setup
 const istumbleQuestions = [
   { id: "pain", text: "Intense Pain?", desc: "e.g. verbal or visible pain on movement" },
   { id: "spine", text: "Spine Pain or Tenderness?", desc: "e.g. tenderness to neck/back or visible injury" },
@@ -43,6 +86,7 @@ const istumbleQuestions = [
 
 function buildIstumble() {
   const container = document.getElementById("istumble-content");
+  container.innerHTML = "";
   istumbleQuestions.forEach(q => {
     const select = createSelect(q.id, [
       { value: "Yes", text: "Yes" },
@@ -69,254 +113,161 @@ function evaluateIstumble() {
   }
 }
 
-// === FRAT Setup ===
-const fratQuestions = [
-  { id: "falls", text: "Previous falls in last 12 months?", desc: "e.g. confirmed by patient or carer", options: [
-    {value: "0", text: "None"},
-    {value: "2", text: "One"},
-    {value: "4", text: "Two or more"}
-  ]},
-  { id: "meds", text: "Medications (number of daily meds)?", desc: "e.g. 0-3, 4-6, 7+", options: [
-    {value: "0", text: "0-3"},
-    {value: "1", text: "4-6"},
-    {value: "2", text: "7+"}
-  ]},
-  { id: "psych", text: "Psychological status (mood)?", desc: "e.g. Normal, Mild, Severe", options: [
-    {value: "0", text: "Normal"},
-    {value: "1", text: "Mild"},
-    {value: "2", text: "Severe"}
-  ]},
-  { id: "cog", text: "Cognitive function (AMTS)?", desc: "e.g. 10 (normal), 7-9, <7", options: [
-    {value: "0", text: "10"},
-    {value: "2", text: "7-9"},
-    {value: "4", text: "<7"}
-  ]},
-  { id: "func", text: "Functional status change?", desc: "Recent change in function or mobility", options: [
-    {value: "0", text: "No"},
-    {value: "1", text: "Yes"}
-  ]},
-  { id: "postural", text: "Postural hypotension?", desc: "Symptoms or documented drop in BP", options: [
-    {value: "0", text: "No"},
-    {value: "1", text: "Yes"}
-  ]}
-];
-
+// FRAT Build (with Yes/No dropdown checklist and AMTS ref button)
 function buildFrat() {
-  const container = document.getElementById("frat-content");
-  fratQuestions.forEach(q => {
-    if (q.id === "cog") {
-      const infoBtn = document.createElement("button");
-      infoBtn.type = "button";
-      infoBtn.textContent = "ℹ️ AMTS Questions";
-      infoBtn.style.marginLeft = "10px";
-      infoBtn.style.fontSize = "0.9rem";
+  const fratContainer = document.getElementById("frat-content");
+  fratContainer.innerHTML = "";
 
-      infoBtn.addEventListener("click", () => {
-        document.getElementById("amts-modal").style.display = "block";
-      });
+  const recentFalls = createSelect("recentFalls", [
+    { value: "2", text: "None in last 12 months" },
+    { value: "4", text: "One or more between 3 and 12 months ago" },
+    { value: "6", text: "One or more in last 3 months" },
+    { value: "8", text: "One or more in last 3 months whilst inpatient / resident" }
+  ], "Select recent falls");
+  fratContainer.appendChild(createLabelWithElement("Recent Falls", recentFalls, "To score this, complete history of falls overleaf"));
 
-      const select = createSelect(q.id, q.options);
-      const label = createLabel(q.text, select, q.desc);
-      label.appendChild(infoBtn);
-      container.appendChild(label);
-    } else {
-      const select = createSelect(q.id, q.options);
-      container.appendChild(createLabel(q.text, select, q.desc));
-    }
-  });
-}
+  const meds = createSelect("meds", [
+    { value: "1", text: "Not taking any of these" },
+    { value: "2", text: "Taking one (Sedatives, Anti-Depressants)" },
+    { value: "3", text: "Taking two (Anti-Parkinson’s, Diuretics)" },
+    { value: "4", text: "Taking more than two (Anti-hypertensives, hypnotics)" }
+  ], "Select medication count");
+  fratContainer.appendChild(createLabelWithElement("Medications", meds));
 
-function calculateFrat() {
-  let score = 0;
-  let risk = "";
-  let advisories = [];
+  const psych = createSelect("psych", [
+    { value: "1", text: "No apparent psychological issues" },
+    { value: "2", text: "Mild anxiety/depression or mildly affected" },
+    { value: "3", text: "Moderately affected (poor cooperation, insight)" },
+    { value: "4", text: "Severely affected (poor judgement esp. re mobility)" }
+  ], "Select psychological status");
+  fratContainer.appendChild(createLabelWithElement("Psychological Status", psych));
 
-  fratQuestions.forEach(q => {
-    const val = document.getElementById(q.id).value;
-    if (val === "") return;
-    score += parseInt(val, 10);
-  });
+  // Cognitive status + AMTS reference button container
+  const cog = createSelect("cog", [
+    { value: "1", text: "AMTS 9 or 10 (Intact)" },
+    { value: "2", text: "AMTS 7-8 (Mildly Impaired)" },
+    { value: "3", text: "AMTS 5-6 (Moderately Impaired)" },
+    { value: "4", text: "AMTS 4 or less (Severely Impaired)" }
+  ], "Select cognitive status");
 
-  if (score >= 16) {
-    risk = "High Risk";
-  } else if (score >= 12) {
-    risk = "Medium Risk";
-  } else if (score >= 5) {
-    risk = "Low Risk";
-  } else {
-    risk = "Minimal Risk";
-  }
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.alignItems = "center";
+  container.style.gap = "10px";
 
-  if (score >= 16) advisories.push("Urgent referral to falls prevention team.");
-  if (score >= 12 && score < 16) advisories.push("Consider referral and close monitoring.");
+  const labelText = document.createElement("label");
+  labelText.htmlFor = "cog";
+  labelText.style.fontWeight = "600";
+  labelText.textContent = "Cognitive Status (AMTS)";
 
-  const resultDiv = document.getElementById("frat-result");
-  resultDiv.innerHTML = `<strong>FRAT Score: ${score} / 20 (${risk})</strong>`;
-  if (advisories.length) {
-    resultDiv.innerHTML += "<ul>" + advisories.map(a => `<li>${a}</li>`).join("") + "</ul>";
-  }
-  resultDiv.className = risk === "High Risk" ? "risk-result high-risk" : "risk-result low-risk";
-}
+  const refButton = document.createElement("button");
+  refButton.type = "button";
+  refButton.textContent = "AMTS Questions";
+  refButton.style.padding = "4px 8px";
+  refButton.style.fontSize = "0.85rem";
+  refButton.style.cursor = "pointer";
+  refButton.style.backgroundColor = "#00703c";
+  refButton.style.color = "white";
+  refButton.style.border = "none";
+  refButton.style.borderRadius = "4px";
 
-// === OBS & NEWS2 Setup ===
-const obsFields = [
-  { id: "rr", text: "Respiratory Rate (breaths/min)", min: 8, max: 25 },
-  { id: "spo2", text: "Oxygen Saturation (%)", min: 80, max: 100 },
-  { id: "o2supp", text: "Oxygen Supplement?", options: ["No", "Yes"] },
-  { id: "temp", text: "Temperature (°C)", min: 34.0, max: 42.0 },
-  { id: "sbp", text: "Systolic Blood Pressure (mmHg)", min: 70, max: 200 },
-  { id: "hr", text: "Heart Rate (bpm)", min: 40, max: 150 },
-  { id: "avpu", text: "Level of Consciousness (AVPU)", options: ["Alert", "Voice", "Pain", "Unresponsive"] }
-];
-
-function buildObs() {
-  const container = document.getElementById("obs-content");
-  obsFields.forEach(f => {
-    let input;
-    if (f.options) {
-      input = createSelect(f.id, f.options.map(o => ({value: o, text: o})));
-    } else {
-      input = document.createElement("input");
-      input.type = "number";
-      input.id = f.id;
-      input.min = f.min;
-      input.max = f.max;
-      input.placeholder = f.text;
-    }
-    container.appendChild(createLabel(f.text, input));
-  });
-}
-
-function calculateNews2() {
-  function scoreRR(rr) {
-    if (rr === "") return 0;
-    rr = Number(rr);
-    if (rr <= 8) return 3;
-    if (rr <= 11) return 1;
-    if (rr >= 25) return 3;
-    if (rr >= 21) return 2;
-    return 0;
-  }
-
-  function scoreSpo2(spo2, o2supp) {
-    spo2 = Number(spo2);
-    if (spo2 === "") return 0;
-    if (spo2 <= 91) return 3;
-    if (spo2 <= 93) return 2;
-    if (spo2 <= 95) return 1;
-    return 0;
-  }
-
-  function scoreTemp(temp) {
-    if (temp === "") return 0;
-    temp = Number(temp);
-    if (temp <= 35) return 3;
-    if (temp >= 39.1) return 2;
-    if (temp >= 38.1) return 1;
-    return 0;
-  }
-
-  function scoreSBP(sbp) {
-    if (sbp === "") return 0;
-    sbp = Number(sbp);
-    if (sbp <= 90) return 3;
-    if (sbp <= 100) return 2;
-    if (sbp <= 110) return 1;
-    return 0;
-  }
-
-  function scoreHR(hr) {
-    if (hr === "") return 0;
-    hr = Number(hr);
-    if (hr <= 40) return 3;
-    if (hr <= 50) return 1;
-    if (hr >= 131) return 3;
-    if (hr >= 111) return 2;
-    if (hr >= 91) return 1;
-    return 0;
-  }
-
-  function scoreAVPU(avpu) {
-    if (avpu === "") return 0;
-    if (avpu === "Alert") return 0;
-    return 3;
-  }
-
-  const rr = document.getElementById("rr").value;
-  const spo2 = document.getElementById("spo2").value;
-  const o2supp = document.getElementById("o2supp").value;
-  const temp = document.getElementById("temp").value;
-  const sbp = document.getElementById("sbp").value;
-  const hr = document.getElementById("hr").value;
-  const avpu = document.getElementById("avpu").value;
-
-  let total = 0;
-  total += scoreRR(rr);
-  total += scoreSpo2(spo2, o2supp);
-  total += scoreTemp(temp);
-  total += scoreSBP(sbp);
-  total += scoreHR(hr);
-  total += scoreAVPU(avpu);
-
-  let riskBand = "low-risk";
-  let riskText = "Low Risk";
-  if (total >= 7) {
-    riskBand = "high-risk";
-    riskText = "High Risk — Escalate Immediately";
-  } else if (total >= 5) {
-    riskBand = "medium-risk";
-    riskText = "Medium Risk — Close Monitoring";
-  }
-
-  const resultDiv = document.getElementById("news2-result");
-  resultDiv.textContent = `NEWS2 Score: ${total} (${riskText})`;
-  resultDiv.className = `risk-result ${riskBand}`;
-}
-
-// === Setup & event listeners ===
-document.addEventListener("DOMContentLoaded", () => {
-  buildIstumble();
-  buildFrat();
-  buildObs();
-
-  document.getElementById("istumble-evaluate").addEventListener("click", evaluateIstumble);
-  document.getElementById("frat-calculate").addEventListener("click", calculateFrat);
-
-  ["rr", "spo2", "o2supp", "temp", "sbp", "hr", "avpu"].forEach(id => {
-    document.getElementById(id).addEventListener("input", calculateNews2);
-    document.getElementById(id).addEventListener("change", calculateNews2);
+  refButton.addEventListener("click", () => {
+    document.getElementById("amts-modal").style.display = "block";
   });
 
-  document.getElementById("generate-email").addEventListener("click", () => {
-    const istumbleAnswers = istumbleQuestions.map(q => `${q.text}: ${document.getElementById(q.id).value || "Not answered"}`).join("\n");
-    const fratAnswers = fratQuestions.map(q => `${q.text}: ${document.getElementById(q.id).value || "Not answered"}`).join("\n");
-    const obsAnswers = obsFields.map(f => `${f.text}: ${document.getElementById(f.id).value || "Not answered"}`).join("\n");
-    const news2Score = document.getElementById("news2-result").textContent || "Not calculated";
+  container.appendChild(labelText);
+  container.appendChild(refButton);
 
-    const summary =
-      `Falls Assessment Summary:\n\n` +
-      `ISTUMBLE:\n${istumbleAnswers}\n\n` +
-      `FRAT:\n${fratAnswers}\n\n` +
-      `Observations:\n${obsAnswers}\n\n` +
-      `NEWS2 Score:\n${news2Score}`;
+  const labelWithSelect = createLabelWithElement("", cog);
+  labelWithSelect.insertBefore(container, labelWithSelect.firstChild);
 
-    const subject = encodeURIComponent("Falls Assessment Summary");
-    const body = encodeURIComponent(summary);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  fratContainer.appendChild(labelWithSelect);
+
+  // High Risk Checkboxes
+  const highRisk1 = createInput("autoHighRisk1", "checkbox");
+  const highRisk1Label = document.createElement("label");
+  highRisk1Label.htmlFor = "autoHighRisk1";
+  highRisk1Label.textContent = "Recent change in functional status and/or medications affecting safe mobility (or anticipated)";
+  highRisk1Label.style.display = "block";
+  highRisk1Label.style.marginTop = "15px";
+
+  const highRisk2 = createInput("autoHighRisk2", "checkbox");
+  const highRisk2Label = document.createElement("label");
+  highRisk2Label.htmlFor = "autoHighRisk2";
+  highRisk2Label.textContent = "Dizziness / postural hypotension";
+  highRisk2Label.style.display = "block";
+
+  fratContainer.appendChild(highRisk1);
+  fratContainer.appendChild(highRisk1Label);
+  fratContainer.appendChild(highRisk2);
+  fratContainer.appendChild(highRisk2Label);
+
+  const part2Title = document.createElement("h3");
+  part2Title.textContent = "Part 2: Risk Factor Checklist";
+  part2Title.style.marginTop = "30px";
+  fratContainer.appendChild(part2Title);
+
+  const checklistItems = [
+    "Vision Reports / observed difficulty seeing - objects / signs / finding way around",
+    "Mobility status unknown or appears unsafe / impulsive / forgets gait aid",
+    "Transfer status unknown or appears unsafe ie. over-reaches, impulsive",
+    "Observed or reported agitation, confusion, disorientation",
+    "Difficulty following instructions or non-compliant (observed or known)",
+    "Observed risk-taking behaviours, or reported from referrer / previous facility",
+    "Observed unsafe use of equipment",
+    "Unsafe footwear / inappropriate clothing",
+    "Difficulties with orientation to environment i.e. areas between bed / bathroom / dining room",
+    "Underweight / low appetite",
+    "Reported or known urgency / nocturia / accidents"
+  ];
+
+  checklistItems.forEach((item, i) => {
+    const select = createSelect(`checklist${i}`, [
+      { value: "", text: "Please Select" },
+      { value: "Yes", text: "Yes" },
+      { value: "No", text: "No" }
+    ]);
+    fratContainer.appendChild(createLabelWithElement(item, select));
   });
 
-  document.getElementById("close-amts").addEventListener("click", () => {
-    document.getElementById("amts-modal").style.display = "none";
-  });
+  const historyTitle = document.createElement("h3");
+  historyTitle.textContent = "History of Falls";
+  historyTitle.style.marginTop = "30px";
+  fratContainer.appendChild(historyTitle);
 
-  // PWA Service Worker registration
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').then(registration => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch(error => {
-        console.log('Service Worker registration failed:', error);
-      });
-    });
-  }
-});
+  const fallsDuringStayChk = createInput("fallsDuringStay", "checkbox");
+  const fallsDuringStayLabel = document.createElement("label");
+  fallsDuringStayLabel.htmlFor = "fallsDuringStay";
+  fallsDuringStayLabel.textContent = "Falls prior to this admission / during current stay";
+  fallsDuringStayLabel.style.display = "block";
+  fratContainer.appendChild(fallsDuringStayChk);
+  fratContainer.appendChild(fallsDuringStayLabel);
+
+  const fallsInfo = createTextarea("fallsInfo", "Describe circumstances of recent falls, details and comments");
+  fratContainer.appendChild(createLabelWithElement("Circumstances of Recent Falls", fallsInfo));
+
+  const infoSource = createInput("infoSource", "text", "Information obtained from (patient/family/medical records)");
+  fratContainer.appendChild(createLabelWithElement("Information Source", infoSource));
+
+  const reviewTitle = document.createElement("h3");
+  reviewTitle.textContent = "Review";
+  reviewTitle.style.marginTop = "30px";
+  fratContainer.appendChild(reviewTitle);
+
+  const reviewDate1 = createDateInput("reviewDate1");
+  fratContainer.appendChild(createLabelWithElement("Review Date", reviewDate1));
+
+  const riskStatus1 = createSelect("riskStatus1", [
+    { value: "", text: "Please Select" },
+    { value: "Low", text: "Low" },
+    { value: "Medium", text: "Medium" },
+    { value: "High", text: "High" }
+  ]);
+  fratContainer.appendChild(createLabelWithElement("Risk Status", riskStatus1));
+
+  const revisedCarePlan1 = createSelect("revisedCarePlan1", [
+    { value: "", text: "Please Select" },
+    { value: "Y", text: "Yes" },
+    { value: "N", text: "No" }
+  ]);
+  fratContainer.appendChild(createLabel
